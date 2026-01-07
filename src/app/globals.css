@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
   --background: #ffffff;
@@ -6,21 +7,50 @@
 }
 
 @theme inline {
+  --color-primary: #5545FF;
+  --color-secondary: #DFDFDF;
+  --color-secondary-light: #F6F6F6;
+  --color-secondary-100: #D7D7D7;
+  --color-secondary-200: #BABAB9;
+  --color-secondary-300: #E2E6EA;
+  --color-gray-light: #FBFBFB;
+  --color-cyan: #95F3EE;
+  --color-tertiary: #1B1C1E;
+  --color-tertiary-light: #444444;
+  --color-quaternary: #1F1F1F;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-interTight);
   --font-mono: var(--font-geist-mono);
+  --text-1.5xl: 22px;
+  --text-2.5xl: 28px;
+  --breakpoint-nav: 1330px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #FFFFFF;
+    --foreground: #171717;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-interTight), Arial, Helvetica, sans-serif;
+  min-height: 100%;
+}
+
+.font-interTight {
+  font-family: var(--font-interTight), Arial, Helvetica, sans-serif;
+}
+
+/* Hide scrollbar but keep scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE & Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari */
 }

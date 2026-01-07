@@ -1,0 +1,81 @@
+{
+  "format": "custom",
+  "id": "locations",
+  "label": "Location",
+  "repeatable": true,
+  "status": true,
+  "json": {
+    "Main": {
+      "uid": {
+        "type": "UID",
+        "config": {
+          "label": "UID"
+        }
+      },
+      "feature_image": {
+        "type": "Image",
+        "config": {
+          "label": "Feature Image",
+          "constraint": {},
+          "thumbnails": []
+        }
+      },
+      "title": {
+        "type": "StructuredText",
+        "config": {
+          "label": "Title",
+          "placeholder": "",
+          "allowTargetBlank": true,
+          "multi": "heading1,heading2,heading3,heading4,heading5,heading6"
+        }
+      },
+      "timings": {
+        "type": "Timestamp",
+        "config": {
+          "label": "Timings",
+          "placeholder": ""
+        }
+      },
+      "location": {
+        "type": "GeoPoint",
+        "config": {
+          "label": "Location"
+        }
+      },
+      "details": {
+        "type": "StructuredText",
+        "config": {
+          "label": "Details",
+          "placeholder": "",
+          "allowTargetBlank": true,
+          "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+        }
+      },
+      "owner_name": {
+        "type": "StructuredText",
+        "config": {
+          "label": "Owner name",
+          "placeholder": "",
+          "allowTargetBlank": true,
+          "multi": "paragraph"
+        }
+      },
+      "reviews": {
+        "type": "Number",
+        "config": {
+          "label": "Reviews",
+          "placeholder": ""
+        }
+      },
+      "features": {
+        "type": "StructuredText",
+        "config": {
+          "label": "Features",
+          "placeholder": "",
+          "allowTargetBlank": true,
+          "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+        }
+      }
+    }
+  }
+}
