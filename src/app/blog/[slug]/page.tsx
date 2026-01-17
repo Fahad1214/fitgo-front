@@ -2,7 +2,8 @@ import React from "react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getBlogPostBySlug, getRelatedBlogPosts } from "@/lib/blogdata";
+import type { Metadata } from "next";
+import { getBlogPostBySlug, getRelatedBlogPosts, getBlogDocumentBySlug } from "@/lib/blogdata";
 
 /**
  * Process HTML content to wrap consecutive images in a flex container
@@ -69,6 +70,127 @@ export async function generateStaticParams() {
   }));
 }
 
+/**
+ * Generate metadata for SEO
+ */
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getBlogPostBySlug(slug);
+
+  if (!post) {
+    return {
+      title: "Post Not Found",
+    };
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://fitgo.com";
+  const pageUrl = `${siteUrl}/blog/${slug}`;
+
+  return {
+    title: post.metaTitle || post.title,
+    description: post.metaDescription || post.description || "",
+    keywords: post.focusKeyword
+      ? [post.focusKeyword, post.secondaryKeywords].filter(Boolean).join(", ")
+      : undefined,
+    alternates: {
+      canonical: post.canonicalUrl || pageUrl,
+    },
+    openGraph: {
+      title: post.metaTitle || post.title,
+      description: post.metaDescription || post.description || "",
+      url: pageUrl,
+      siteName: "FitGo",
+      images: post.ogImage
+        ? [
+            {
+              url: post.ogImage,
+              width: 1200,
+              height: 630,
+              alt: post.alt || post.title,
+            },
+          ]
+        : [
+            {
+              url: post.image,
+              width: 1200,
+              height: 630,
+              alt: post.alt || post.title,
+            },
+          ],
+      type: "article",
+      publishedTime: post.publishDate,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.metaTitle || post.title,
+      description: post.metaDescription || post.description || "",
+      images: [post.ogImage || post.image],
+    },
+    robots: {
+      index: !post.noIndex,
+      follow: !post.noIndex,
+      googleBot: {
+        index: !post.noIndex,
+        follow: !post.noIndex,
+      },
+    },
+  };
+}
+
+/**
+ * Generate structured data (JSON-LD) for SEO
+ */
+function generateStructuredData(post: any) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://fitgo.com";
+  const pageUrl = `${siteUrl}/blog/${post.slug}`;
+
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": post.schemaType || "Article",
+    headline: post.title,
+    description: post.metaDescription || post.description || "",
+    image: post.ogImage || post.image,
+    datePublished: post.publishDate || post.date,
+    author: {
+      "@type": "Person",
+      name: post.author || "FitGo",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "FitGo",
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/Logo.png`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": pageUrl,
+    },
+  };
+
+  // If FAQs exist, return both Article and FAQPage schemas
+  if (post.faq && post.faq.length > 0) {
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: post.faq.map((item: any) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.answer.replace(/<[^>]*>/g, ""), // Strip HTML tags
+        },
+      })),
+    };
+    
+    // Return both schemas as an array
+    return [articleSchema, faqSchema];
+  }
+
+  return articleSchema;
+}
+
 const BlogDetailPage = async ({ params }: PageProps) => {
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);
@@ -78,9 +200,16 @@ const BlogDetailPage = async ({ params }: PageProps) => {
   }
 
   const relatedPosts = await getRelatedBlogPosts(slug, 3);
+  const structuredData = generateStructuredData(post);
 
   return (
-    <div className="min-h-screen">
+    <>
+      {/* Structured Data (JSON-LD) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <div className="min-h-screen">
       {/* Top Section: Title, Subtitle, Author on Left; Hero Image on Right */}
       <div className="bg-gray-light sm:pt-48 pt-12 lg:pb-6 pb-12 px-5">
         <div className="max-w-[1380px] mx-auto px-5 sm:px-0 mb-8 sm:mb-0">
@@ -117,11 +246,35 @@ const BlogDetailPage = async ({ params }: PageProps) => {
                 {post.description}
               </p>
             )}
-            {post.author && (
-              <p className="text-tertiary font-semibold text-base sm:text-lg">
-                Written By {post.author}
-              </p>
+            {/* Quick Answer (AEO) */}
+            {post.quickAnswer && (
+              <div className="bg-blue-50 border-l-4 border-primary p-4 mb-6 rounded-r-lg">
+                <p className="text-tertiary font-semibold text-base sm:text-lg">
+                  <strong>Quick Answer:</strong> {post.quickAnswer}
+                </p>
+              </div>
             )}
+            <div className="flex flex-col gap-2 mb-4">
+              {post.author && (
+                <p className="text-tertiary font-semibold text-base sm:text-lg">
+                  Written By {post.author}
+                </p>
+              )}
+              {post.readingTime && (
+                <p className="text-tertiary font-semibold text-sm sm:text-base">
+                  {post.readingTime} min read
+                </p>
+              )}
+              {post.publishDate && (
+                <p className="text-tertiary font-semibold text-sm sm:text-base">
+                  Published: {new Date(post.publishDate).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Right: Hero Image */}
@@ -205,6 +358,39 @@ const BlogDetailPage = async ({ params }: PageProps) => {
 
         {/* Right Column: Main Content */}
         <article className="lg:col-span-2">
+          {/* Feature Snippet Target (AEO) */}
+          {post.featureSnippetTarget && (
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-l-4 border-primary p-6 mb-8 rounded-r-lg">
+              <div
+                className="prose prose-lg max-w-none 
+                  prose-p:text-tertiary prose-p:font-semibold prose-p:leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: post.featureSnippetTarget }}
+              />
+            </div>
+          )}
+
+          {/* Key Takeaways (AEO) */}
+          {post.keyTakeaways && post.keyTakeaways.length > 0 && (
+            <div className="bg-orange-50 border-l-4 border-orange-500 p-6 mb-8 rounded-r-lg">
+              <h2 className="text-tertiary-light font-semibold text-xl sm:text-2xl mb-4">
+                Key Takeaways
+              </h2>
+              <ul className="space-y-3">
+                {post.keyTakeaways.map((takeaway, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <span className="text-primary font-bold text-xl mt-1">✓</span>
+                    <div
+                      className="prose prose-sm max-w-none 
+                        prose-p:text-tertiary prose-p:font-semibold prose-p:leading-relaxed prose-p:m-0"
+                      dangerouslySetInnerHTML={{ __html: takeaway.takeaway }}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Main Content */}
           <div
             className="prose prose-lg max-w-none 
               prose-headings:text-tertiary-light prose-headings:font-semibold 
@@ -220,6 +406,54 @@ const BlogDetailPage = async ({ params }: PageProps) => {
               prose-hr:border-tertiary"
             dangerouslySetInnerHTML={{ __html: processConsecutiveImages(post.content || "") }}
           />
+
+          {/* FAQ Section (AEO) */}
+          {post.faq && post.faq.length > 0 && (
+            <div className="my-12">
+              <h2 className="text-tertiary-light font-semibold text-2xl sm:text-3xl mb-6">
+                Frequently Asked Questions
+              </h2>
+              <div className="space-y-6">
+                {post.faq.map((item, index) => (
+                  <div key={index} className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <h3 className="text-tertiary-light font-semibold text-lg sm:text-xl mb-3">
+                      {item.question}
+                    </h3>
+                    <div
+                      className="prose prose-base max-w-none 
+                        prose-p:text-tertiary prose-p:font-semibold prose-p:leading-relaxed 
+                        prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline"
+                      dangerouslySetInnerHTML={{ __html: item.answer }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Related Questions (AEO) */}
+          {post.relatedQuestions && post.relatedQuestions.length > 0 && (
+            <div className="my-12">
+              <h2 className="text-tertiary-light font-semibold text-2xl sm:text-3xl mb-6">
+                Related Questions
+              </h2>
+              <div className="space-y-6">
+                {post.relatedQuestions.map((item, index) => (
+                  <div key={index} className="bg-blue-50 p-6 rounded-lg border-l-4 border-primary">
+                    <h3 className="text-tertiary-light font-semibold text-lg sm:text-xl mb-3">
+                      {item.question}
+                    </h3>
+                    <div
+                      className="prose prose-base max-w-none 
+                        prose-p:text-tertiary prose-p:font-semibold prose-p:leading-relaxed 
+                        prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline"
+                      dangerouslySetInnerHTML={{ __html: item.answer }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {relatedPosts.length > 0 && (
             <div className="my-24">
               <h2 className="text-tertiary-light font-semibold  text-xl sm:text-2xl mb-6">
@@ -260,6 +494,7 @@ const BlogDetailPage = async ({ params }: PageProps) => {
         </article>
       </div>
     </div>
+    </>
   );
 };
 

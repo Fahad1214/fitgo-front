@@ -21,6 +21,13 @@
           "multi": "heading1,heading2,heading3,heading4,heading5,heading6"
         }
       },
+      "meta_title": {
+        "type": "Text",
+        "config": {
+          "label": "Meta Title",
+          "placeholder": ""
+        }
+      },
       "description": {
         "type": "StructuredText",
         "config": {
@@ -30,12 +37,65 @@
           "multi": "paragraph"
         }
       },
+      "meta_description": {
+        "type": "Text",
+        "config": {
+          "label": "Meta Description",
+          "placeholder": ""
+        }
+      },
+      "focus_keyword": {
+        "type": "Text",
+        "config": {
+          "label": "Focus Keyword",
+          "placeholder": ""
+        }
+      },
+      "secondary_keywords": {
+        "type": "Text",
+        "config": {
+          "label": "Secondary Keywords",
+          "placeholder": ""
+        }
+      },
+      "cannonical_url": {
+        "type": "Link",
+        "config": {
+          "label": "Cannonical Url",
+          "placeholder": "",
+          "select": null,
+          "allowTargetBlank": true,
+          "allowText": true,
+          "repeat": false
+        }
+      },
       "image": {
         "type": "Image",
         "config": {
           "label": "Image",
           "constraint": {},
           "thumbnails": []
+        }
+      },
+      "image_alt": {
+        "type": "Text",
+        "config": {
+          "label": "Image Alt",
+          "placeholder": ""
+        }
+      },
+      "publish_date": {
+        "type": "Date",
+        "config": {
+          "label": "Publish Date",
+          "placeholder": ""
+        }
+      },
+      "reading_time": {
+        "type": "Number",
+        "config": {
+          "label": "Reading Time",
+          "placeholder": ""
         }
       },
       "content": {
@@ -47,6 +107,21 @@
           "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
         }
       },
+      "content_category": {
+        "type": "Select",
+        "config": {
+          "label": "Content Category",
+          "placeholder": "",
+          "options": ["Fitness", "Health", "Workout"]
+        }
+      },
+      "schema_type": {
+        "type": "Text",
+        "config": {
+          "label": "Schema type ",
+          "placeholder": ""
+        }
+      },
       "author_name": {
         "type": "StructuredText",
         "config": {
@@ -54,6 +129,140 @@
           "placeholder": "",
           "allowTargetBlank": true,
           "multi": "paragraph"
+        }
+      },
+      "quick_answer": {
+        "type": "Text",
+        "config": {
+          "label": "Quick Answer",
+          "placeholder": ""
+        }
+      },
+      "og_image": {
+        "type": "Image",
+        "config": {
+          "label": "OG Image",
+          "constraint": {},
+          "thumbnails": []
+        }
+      },
+      "table_of_contents": {
+        "type": "Boolean",
+        "config": {
+          "label": "Table of Contents",
+          "placeholder_false": "false",
+          "placeholder_true": "true",
+          "default_value": false
+        }
+      },
+      "no_index": {
+        "type": "Boolean",
+        "config": {
+          "label": "No index",
+          "placeholder_false": "false",
+          "placeholder_true": "true",
+          "default_value": false
+        }
+      },
+      "faq": {
+        "type": "Group",
+        "config": {
+          "label": "FAQ",
+          "repeat": true,
+          "fields": {
+            "question": {
+              "type": "StructuredText",
+              "config": {
+                "label": "Question",
+                "placeholder": "",
+                "allowTargetBlank": true,
+                "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+              }
+            },
+            "answer": {
+              "type": "StructuredText",
+              "config": {
+                "label": "Answer",
+                "placeholder": "",
+                "allowTargetBlank": true,
+                "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+              }
+            }
+          }
+        }
+      },
+      "related_questions": {
+        "type": "Group",
+        "config": {
+          "label": "Related Questions",
+          "repeat": true,
+          "fields": {
+            "question": {
+              "type": "StructuredText",
+              "config": {
+                "label": "Question",
+                "placeholder": "",
+                "allowTargetBlank": true,
+                "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+              }
+            },
+            "answer": {
+              "type": "StructuredText",
+              "config": {
+                "label": "Answer",
+                "placeholder": "",
+                "allowTargetBlank": true,
+                "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+              }
+            }
+          }
+        }
+      },
+      "key_takeways": {
+        "type": "Group",
+        "config": {
+          "label": "Key Takeways",
+          "repeat": true,
+          "fields": {
+            "takeaway": {
+              "type": "StructuredText",
+              "config": {
+                "label": "Takeaway",
+                "placeholder": "",
+                "allowTargetBlank": true,
+                "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+              }
+            }
+          }
+        }
+      },
+      "author_social_links": {
+        "type": "Group",
+        "config": {
+          "label": "Author Social Links",
+          "repeat": true,
+          "fields": {
+            "link": {
+              "type": "Link",
+              "config": {
+                "label": "Link",
+                "placeholder": "",
+                "select": null,
+                "allowTargetBlank": true,
+                "allowText": true,
+                "repeat": false
+              }
+            }
+          }
+        }
+      },
+      "feature_snippet_target": {
+        "type": "StructuredText",
+        "config": {
+          "label": "Feature Snippet Target",
+          "placeholder": "",
+          "allowTargetBlank": true,
+          "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
         }
       }
     }

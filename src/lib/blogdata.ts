@@ -2,6 +2,20 @@ import { createClient } from "@/prismicio";
 import { asHTML, asText } from "@prismicio/client";
 import type { BlogDocument } from "../../prismicio-types";
 
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+export interface RelatedQuestionItem {
+  question: string;
+  answer: string;
+}
+
+export interface KeyTakeawayItem {
+  takeaway: string;
+}
+
 export interface BlogPost {
   id: string;
   slug: string;
@@ -15,6 +29,24 @@ export interface BlogPost {
   alt?: string;
   content?: string;
   author?: string;
+  // SEO Fields
+  metaTitle?: string;
+  metaDescription?: string;
+  focusKeyword?: string;
+  secondaryKeywords?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+  noIndex?: boolean;
+  // AEO Fields
+  quickAnswer?: string;
+  faq?: FAQItem[];
+  relatedQuestions?: RelatedQuestionItem[];
+  keyTakeaways?: KeyTakeawayItem[];
+  featureSnippetTarget?: string;
+  tableOfContents?: boolean;
+  schemaType?: string;
+  readingTime?: number;
+  publishDate?: string;
 }
 
 /**
@@ -23,13 +55,44 @@ export interface BlogPost {
 function transformBlogPost(doc: BlogDocument): BlogPost {
   const imageUrl = doc.data.image?.url || "/BlogPage.png";
   const imageAlt = doc.data.image?.alt || asText(doc.data.title) || "";
+  const ogImageUrl = doc.data.og_image?.url || imageUrl;
+
+  // Transform FAQ items
+  const faqItems: FAQItem[] = (doc.data.faq || []).map((item) => ({
+    question: asText(item.question) || "",
+    answer: asHTML(item.answer) || "",
+  }));
+
+  // Transform Related Questions items
+  const relatedQuestionsItems: RelatedQuestionItem[] = (doc.data.related_questions || []).map((item) => ({
+    question: asText(item.question) || "",
+    answer: asHTML(item.answer) || "",
+  }));
+
+  // Transform Key Takeaways items
+  const keyTakeawaysItems: KeyTakeawayItem[] = (doc.data.key_takeways || []).map((item) => ({
+    takeaway: asHTML(item.takeaway) || "",
+  }));
+
+  // Get canonical URL
+  let canonicalUrl: string | undefined;
+  if (doc.data.cannonical_url) {
+    // Prismic link fields can be external links (with url) or document links
+    if (doc.data.cannonical_url.link_type === "Web" && doc.data.cannonical_url.url) {
+      canonicalUrl = doc.data.cannonical_url.url;
+    } else if (doc.data.cannonical_url.link_type === "Document") {
+      // For document links, you might want to resolve them using your route resolver
+      // For now, we'll skip document links for canonical URLs
+      canonicalUrl = undefined;
+    }
+  }
 
   return {
     id: doc.id,
     slug: doc.uid,
     image: imageUrl,
-    category: "Blog", // Keep for backward compatibility
-    tags: doc.tags || [], // Get tags from Prismic document
+    category: doc.data.content_category || "Blog",
+    tags: doc.tags || [],
     date: doc.first_publication_date
       ? new Date(doc.first_publication_date).toLocaleDateString("en-US", {
           month: "long",
@@ -37,11 +100,31 @@ function transformBlogPost(doc: BlogDocument): BlogPost {
         })
       : "",
     title: asText(doc.data.title) || "",
-    subtitle: undefined, // Add subtitle field in Prismic if needed
+    subtitle: undefined,
     description: asText(doc.data.description) || undefined,
     alt: imageAlt,
     content: asHTML(doc.data.content) || "",
     author: asText(doc.data.author_name) || undefined,
+    // SEO Fields
+    metaTitle: doc.data.meta_title || undefined,
+    metaDescription: doc.data.meta_description || undefined,
+    focusKeyword: doc.data.focus_keyword || undefined,
+    secondaryKeywords: doc.data.secondary_keywords || undefined,
+    canonicalUrl: canonicalUrl,
+    ogImage: ogImageUrl,
+    noIndex: doc.data.no_index || false,
+    // AEO Fields
+    quickAnswer: doc.data.quick_answer || undefined,
+    faq: faqItems.length > 0 ? faqItems : undefined,
+    relatedQuestions: relatedQuestionsItems.length > 0 ? relatedQuestionsItems : undefined,
+    keyTakeaways: keyTakeawaysItems.length > 0 ? keyTakeawaysItems : undefined,
+    featureSnippetTarget: asHTML(doc.data.feature_snippet_target) || undefined,
+    tableOfContents: doc.data.table_of_contents || false,
+    schemaType: doc.data.schema_type || undefined,
+    readingTime: doc.data.reading_time || undefined,
+    publishDate: doc.data.publish_date
+      ? new Date(doc.data.publish_date).toISOString()
+      : undefined,
   };
 }
 
@@ -86,6 +169,23 @@ export async function getBlogPostBySlug(
     return transformBlogPost(doc);
   } catch (error) {
     console.error("Error fetching blog post:", error);
+    return null;
+  }
+}
+
+/**
+ * Get raw blog document by slug (for metadata generation)
+ */
+export async function getBlogDocumentBySlug(
+  slug: string
+): Promise<BlogDocument | null> {
+  const client = createClient();
+
+  try {
+    const doc = await client.getByUID("blog", slug);
+    return doc || null;
+  } catch (error) {
+    console.error("Error fetching blog document:", error);
     return null;
   }
 }
