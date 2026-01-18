@@ -187,6 +187,17 @@ interface BlogDocumentData {
   description: prismic.RichTextField;
 
   /**
+   * Exerpt field in *Blog*
+   *
+   * - **Field Type**: Rich Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: blog.exerpt
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/rich-text
+   */
+  exerpt: prismic.RichTextField;
+
+  /**
    * Meta Description field in *Blog*
    *
    * - **Field Type**: Text

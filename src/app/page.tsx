@@ -87,24 +87,24 @@ export default function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              Transform Your <span className="text-orange-500">Body</span>
+              Transform Your <span className="text-orange-500">Health</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto">
-              Join thousands of fitness enthusiasts on their journey to a stronger, healthier you
+              Expert health and fitness tips, workout guides, and wellness advice to help you achieve your best self
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 
-                href="/gyms" 
+                href="/blog" 
                 className="bg-orange-500 hover:bg-orange-600 px-8 py-4 rounded-lg text-lg font-semibold transition transform hover:scale-105"
               >
-                Find a Gym
+                Read Our Blog
               </Link>
-              <Link 
-                href="/shop" 
+              {/* <Link 
+                href="/locations" 
                 className="bg-transparent border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white px-8 py-4 rounded-lg text-lg font-semibold transition"
               >
-                Shop Equipment
-              </Link>
+                Find Locations
+              </Link> */}
             </div>
           </div>
         </div>
@@ -123,9 +123,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900">Expert Trainers</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900">Expert Health Tips</h3>
               <p className="text-gray-600">
-                Work with certified fitness professionals who will guide you every step of the way
+                Evidence-based health and fitness advice from certified professionals to guide your wellness journey
               </p>
             </div>
             <div className="text-center p-6 rounded-lg hover:shadow-xl transition">
@@ -134,9 +134,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900">Premium Facilities</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900">Workout Guides</h3>
               <p className="text-gray-600">
-                State-of-the-art equipment and clean, modern facilities designed for your success
+                Comprehensive workout plans and exercise routines designed for all fitness levels
               </p>
             </div>
             <div className="text-center p-6 rounded-lg hover:shadow-xl transition">
@@ -145,9 +145,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900">Flexible Hours</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-gray-900">Healthcare Insights</h3>
               <p className="text-gray-600">
-                Train on your schedule with 24/7 access to most locations
+                Stay informed with the latest healthcare trends, nutrition advice, and wellness strategies
               </p>
             </div>
           </div>
@@ -160,19 +160,19 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
               <StatCounter end={50} suffix="K+" />
-              <div className="text-gray-400">Active Members</div>
-            </div>
-            <div>
-              <StatCounter end={200} suffix="+" />
-              <div className="text-gray-400">Gym Locations</div>
+              <div className="text-gray-400">Monthly Readers</div>
             </div>
             <div>
               <StatCounter end={500} suffix="+" />
-              <div className="text-gray-400">Expert Trainers</div>
+              <div className="text-gray-400">Health Articles</div>
+            </div>
+            <div>
+              <StatCounter end={200} suffix="+" />
+              <div className="text-gray-400">Workout Guides</div>
             </div>
             <div>
               <StatCounter end={15} suffix="+" />
-              <div className="text-gray-400">Years Experience</div>
+              <div className="text-gray-400">Years of Expertise</div>
             </div>
           </div>
         </div>
@@ -200,16 +200,16 @@ export default function Home() {
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Ready to Start Your Fitness Journey?
+            Ready to Transform Your Health?
           </h2>
           <p className="text-xl mb-8 text-orange-100">
-            Join FitGo today and get your first month free!
+            Discover expert fitness tips, workout routines, and healthcare insights to achieve your wellness goals
           </p>
           <Link 
-            href="/login" 
+            href="/blog" 
             className="bg-white text-black hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold transition transform hover:scale-105 inline-block"
           >
-            Get Started Now
+            Explore Our Blog
           </Link>
         </div>
       </section>

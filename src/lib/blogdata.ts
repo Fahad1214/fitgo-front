@@ -174,7 +174,7 @@ export async function getBlogPostBySlug(
 }
 
 /**
- * Get raw blog document by slug (for metadata generation)
+ * Get raw blog document by slug (for metadata generation and PrismicRichText)
  */
 export async function getBlogDocumentBySlug(
   slug: string
@@ -188,6 +188,15 @@ export async function getBlogDocumentBySlug(
     console.error("Error fetching blog document:", error);
     return null;
   }
+}
+
+/**
+ * Get blog document by slug (alias for consistency)
+ */
+export async function getBlogPostByUID(
+  uid: string
+): Promise<BlogDocument | null> {
+  return getBlogDocumentBySlug(uid);
 }
 
 /**
@@ -247,6 +256,60 @@ export async function getRelatedBlogPosts(
       .map(transformBlogPost);
 
     // Return only posts with matching tags (no fallback to unrelated posts)
+    return relatedDocs;
+  } catch (error) {
+    console.error("Error fetching related blog posts:", error);
+    return [];
+  }
+}
+
+/**
+ * Get related blog posts as raw documents (for RelatedPosts component)
+ */
+export async function getRelatedBlogPostsDocuments(
+  currentSlug: string,
+  limit: number = 3
+): Promise<BlogDocument[]> {
+  const client = createClient();
+
+  try {
+    const currentPost = await client.getByUID("blog", currentSlug);
+    const currentTags = currentPost?.tags || [];
+
+    if (currentTags.length === 0) {
+      const response = await client.getAllByType("blog", {
+        orderings: [
+          {
+            field: "document.first_publication_date",
+            direction: "desc",
+          },
+        ],
+      });
+
+      return response
+        .filter((doc) => doc.uid !== currentSlug)
+        .slice(0, limit);
+    }
+
+    const response = await client.getAllByType("blog", {
+      orderings: [
+        {
+          field: "document.first_publication_date",
+          direction: "desc",
+        },
+      ],
+    });
+
+    const relatedDocs = response
+      .filter((doc) => {
+        if (doc.uid === currentSlug) {
+          return false;
+        }
+        const docTags = doc.tags || [];
+        return docTags.some((tag) => currentTags.includes(tag));
+      })
+      .slice(0, limit);
+
     return relatedDocs;
   } catch (error) {
     console.error("Error fetching related blog posts:", error);

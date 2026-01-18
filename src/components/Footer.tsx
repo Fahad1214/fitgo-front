@@ -23,7 +23,7 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-gray-400">
               {/* <li><Link href="/shop" className="hover:text-orange-500 transition">Shop</Link></li> */}
-              <li><Link href="/locations" className="hover:text-orange-500 transition">Locations</Link></li>
+              <li><Link href="/blog" className="hover:text-orange-500 transition">Blog</Link></li>
             </ul>
           </div>
           <div className="text-center md:text-left">
@@ -33,7 +33,7 @@ export default function Footer() {
                 <li><Link href="/login" className="hover:text-orange-500 transition">Login</Link></li>
               )}
               <li><a href="#" className="hover:text-orange-500 transition">Contact Us</a></li>
-              <li><a href="#" className="hover:text-orange-500 transition">FAQ</a></li>
+              {/* <li><a href="#" className="hover:text-orange-500 transition">FAQ</a></li> */}
             </ul>
           </div>
           <div className="text-center md:text-left">
@@ -46,7 +46,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 FitGo. All rights reserved.</p>
+          <p>&copy; 2026 FitGo. All rights reserved.</p>
         </div>
       </div>
     </footer>

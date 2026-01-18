@@ -118,7 +118,7 @@ export default function Navbar() {
             >
              Blog
             </Link>
-            <Link 
+            {/* <Link 
               href="/locations" 
               className={`transition font-semibold ${
                 pathname === '/gyms' 
@@ -129,7 +129,7 @@ export default function Navbar() {
               }`}
             >
              Locations
-            </Link>
+            </Link> */}
             <Link 
               href="/contact-us" 
               className={`transition font-semibold ${
