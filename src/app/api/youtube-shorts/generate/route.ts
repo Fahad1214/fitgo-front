@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { mkdir, readFile, rm, readdir, stat } from "fs/promises";
-import { createWriteStream } from "fs";
+import { mkdir, readFile, rm, readdir, stat, writeFile } from "fs/promises";
+import { createWriteStream, existsSync } from "fs";
 import { join, dirname } from "path";
 import { tmpdir } from "os";
 import { randomUUID } from "crypto";
@@ -29,11 +29,41 @@ type YtJson = {
 };
 
 
-function youtubeCookieFlags(): Record<string, string> {
+async function youtubeCookieFlags(workDir: string): Promise<Record<string, string>> {
   const cookieFile = process.env.YT_DLP_COOKIES_FILE?.trim();
   const cookiesFromBrowser = process.env.YT_DLP_COOKIES_FROM_BROWSER?.trim();
+  const cookiesBase64 = process.env.YT_DLP_COOKIES_BASE64?.trim();
+  const cookiesText = process.env.YT_DLP_COOKIES_TEXT?.trim();
   const flags: Record<string, string> = {};
-  if (cookieFile) flags.cookies = cookieFile;
+
+  if (cookiesBase64) {
+    const target = join(workDir, "youtube-cookies.txt");
+    await writeFile(target, Buffer.from(cookiesBase64, "base64"));
+    flags.cookies = target;
+    return flags;
+  }
+
+  if (cookiesText) {
+    const target = join(workDir, "youtube-cookies.txt");
+    await writeFile(target, cookiesText);
+    flags.cookies = target;
+    return flags;
+  }
+
+  if (cookieFile) {
+    if (cookieFile.includes("/absolute/path/to/") || cookieFile.includes("your-cookies")) {
+      throw new Error(
+        "YT_DLP_COOKIES_FILE is still a placeholder. Set it to a real cookies.txt path, or use YT_DLP_COOKIES_BASE64 on Vercel/staging."
+      );
+    }
+    if (!existsSync(cookieFile)) {
+      throw new Error(
+        `YT_DLP_COOKIES_FILE does not exist: ${cookieFile}. Use a real absolute path locally, or YT_DLP_COOKIES_BASE64 on hosted environments.`
+      );
+    }
+    flags.cookies = cookieFile;
+  }
+
   if (cookiesFromBrowser) flags.cookiesFromBrowser = cookiesFromBrowser;
   return flags;
 }
@@ -130,6 +160,7 @@ export async function POST(req: Request) {
     await mkdir(workDir, { recursive: true });
 
     const ffmpegLoc = dirname(ffmpegInstaller.path);
+    const cookieFlags = await youtubeCookieFlags(workDir);
 
     let info: YtJson;
     try {
@@ -138,7 +169,7 @@ export async function POST(req: Request) {
         noWarnings: true,
         noPlaylist: true,
         skipDownload: true,
-        ...youtubeCookieFlags(),
+        ...cookieFlags,
       })) as YtJson;
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Could not read video info";
@@ -187,7 +218,7 @@ export async function POST(req: Request) {
       ffmpegLocation: ffmpegLoc,
       noPlaylist: true,
       noWarnings: true,
-      ...youtubeCookieFlags(),
+      ...cookieFlags,
     };
 
     try {
@@ -199,7 +230,7 @@ export async function POST(req: Request) {
         ffmpegLocation: ffmpegLoc,
         noPlaylist: true,
         noWarnings: true,
-        ...youtubeCookieFlags(),
+        ...cookieFlags,
       });
     }
 

@@ -165,8 +165,9 @@ export default function VideosToShortsPage() {
           format each in a 9:16 frame with a blurred fill so landscape shots are not harshly
           cropped. You get a ZIP of MP4s plus metadata. If YouTube asks to confirm you are not a
           bot in production, configure server cookies via{' '}
-          <code className="bg-gray-100 px-1 rounded">YT_DLP_COOKIES_FILE</code> or{' '}
-          <code className="bg-gray-100 px-1 rounded">YT_DLP_COOKIES_FROM_BROWSER</code>.
+          <code className="bg-gray-100 px-1 rounded">YT_DLP_COOKIES_BASE64</code> (hosted),{' '}
+          <code className="bg-gray-100 px-1 rounded">YT_DLP_COOKIES_FILE</code> (local/server path), or{' '}
+          <code className="bg-gray-100 px-1 rounded">YT_DLP_COOKIES_FROM_BROWSER</code> (local).
         </p>
 
         <form onSubmit={handleCreate} className="space-y-4 mb-12">
