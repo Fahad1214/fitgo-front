@@ -1,6 +1,7 @@
 import { existsSync, realpathSync } from "fs";
 import { execFileSync } from "child_process";
 import { homedir } from "os";
+import { cwd } from "process";
 import { join } from "path";
 import { create } from "youtube-dl-exec";
 import defaultYtdl from "youtube-dl-exec";
@@ -28,11 +29,19 @@ function brewPrefix(bin: string): string | undefined {
   }
 }
 
+/** Standalone binary installed by `npm` postinstall (`scripts/download-yt-dlp.mjs`). */
+function projectBundledYtDlp(): string {
+  const name = process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp";
+  return join(cwd(), "bin", name);
+}
+
 /** Paths where yt-dlp often lives (GUI apps often omit Homebrew from PATH). */
 function staticCandidates(): string[] {
   const list: string[] = [];
   const envPath = process.env.YT_DLP_PATH?.trim();
   if (envPath) list.push(envPath);
+
+  list.push(projectBundledYtDlp());
 
   list.push(
     "/opt/homebrew/bin/yt-dlp",
@@ -136,9 +145,14 @@ export function getYoutubedl(): YoutubeDl {
     cached = create(bin) as YoutubeDl;
     return cached;
   }
+  if (process.platform === "linux" || process.platform === "win32") {
+    throw new Error(
+      "No standalone yt-dlp binary found. Staging/Linux images usually have no Python — run `npm install` so postinstall downloads bin/yt-dlp, or set YT_DLP_PATH to a standalone executable from https://github.com/yt-dlp/yt-dlp/releases ."
+    );
+  }
   if (process.platform === "darwin") {
     throw new Error(
-      "No standalone yt-dlp found. Install with: brew install yt-dlp — then restart the dev server so it picks up PATH. If it still fails, set YT_DLP_PATH to the full path (run: which yt-dlp in Terminal). The npm-bundled copy needs Python 3.10+, which Apple’s CLT Python 3.9 does not satisfy."
+      "No standalone yt-dlp found. Run `npm install` (installs bin/yt-dlp), or: brew install yt-dlp — then restart the dev server. You can also set YT_DLP_PATH. The npm default youtube-dl-exec bundle may require Python 3.10+."
     );
   }
   cached = defaultYtdl;

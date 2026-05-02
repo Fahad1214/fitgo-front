@@ -33,6 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# standalone yt-dlp from postinstall (recreated on each `npm install`)
+/bin/yt-dlp
+/bin/yt-dlp.exe
+
 # vercel
 .vercel
 
