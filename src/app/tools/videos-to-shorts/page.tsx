@@ -163,7 +163,10 @@ export default function VideosToShortsPage() {
           Paste a YouTube URL and choose how many shorts to generate (default 1, up to{' '}
           {MAX_SHORTS_CLIP_COUNT}). We download once, spread clips across the timeline, and
           format each in a 9:16 frame with a blurred fill so landscape shots are not harshly
-          cropped. You get a ZIP of MP4s plus metadata.
+          cropped. You get a ZIP of MP4s plus metadata. If YouTube asks to confirm you are not a
+          bot in production, configure server cookies via{' '}
+          <code className="bg-gray-100 px-1 rounded">YT_DLP_COOKIES_FILE</code> or{' '}
+          <code className="bg-gray-100 px-1 rounded">YT_DLP_COOKIES_FROM_BROWSER</code>.
         </p>
 
         <form onSubmit={handleCreate} className="space-y-4 mb-12">

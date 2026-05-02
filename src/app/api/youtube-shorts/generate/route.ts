@@ -28,6 +28,16 @@ type YtJson = {
   title?: string;
 };
 
+
+function youtubeCookieFlags(): Record<string, string> {
+  const cookieFile = process.env.YT_DLP_COOKIES_FILE?.trim();
+  const cookiesFromBrowser = process.env.YT_DLP_COOKIES_FROM_BROWSER?.trim();
+  const flags: Record<string, string> = {};
+  if (cookieFile) flags.cookies = cookieFile;
+  if (cookiesFromBrowser) flags.cookiesFromBrowser = cookiesFromBrowser;
+  return flags;
+}
+
 async function findDownloadedVideo(dir: string): Promise<string> {
   const entries = await readdir(dir);
   const scored: { path: string; size: number }[] = [];
@@ -128,11 +138,18 @@ export async function POST(req: Request) {
         noWarnings: true,
         noPlaylist: true,
         skipDownload: true,
+        ...youtubeCookieFlags(),
       })) as YtJson;
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Could not read video info";
+      const compact = msg.replace(/\s+/g, " ").slice(0, 800);
+      const needsCookies = /Sign in to confirm you.?re not a bot|cookies-from-browser|Use --cookies/i.test(compact);
       return NextResponse.json(
-        { message: msg.replace(/\s+/g, " ").slice(0, 800) },
+        {
+          message: needsCookies
+            ? `${compact} Configure YT_DLP_COOKIES_FILE (Netscape cookie file path) or YT_DLP_COOKIES_FROM_BROWSER (e.g. chrome) on the server.`
+            : compact,
+        },
         { status: 400 }
       );
     }
@@ -170,6 +187,7 @@ export async function POST(req: Request) {
       ffmpegLocation: ffmpegLoc,
       noPlaylist: true,
       noWarnings: true,
+      ...youtubeCookieFlags(),
     };
 
     try {
@@ -181,6 +199,7 @@ export async function POST(req: Request) {
         ffmpegLocation: ffmpegLoc,
         noPlaylist: true,
         noWarnings: true,
+        ...youtubeCookieFlags(),
       });
     }
 
