@@ -9,6 +9,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  serverExternalPackages: [
+    "archiver",
+    "fluent-ffmpeg",
+    "youtube-dl-exec",
+    "@ffmpeg-installer/ffmpeg",
+    "@ffprobe-installer/ffprobe",
+  ],
 };
 
 export default nextConfig;
