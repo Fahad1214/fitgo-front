@@ -38,6 +38,13 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'User not found', code: error.code },
+          { status: 404 }
+        );
+      }
+
       console.error('Error fetching user profile:', error);
       return NextResponse.json(
         { error: error.message, code: error.code },

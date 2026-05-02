@@ -48,13 +48,15 @@ BEGIN
   
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Trigger to automatically create/update user in public.users when auth.users is created
-CREATE OR REPLACE TRIGGER on_auth_user_created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
   AFTER INSERT OR UPDATE ON auth.users
   FOR EACH ROW
-  EXECUTE FUNCTION public.handle_new_user();
+  EXECUTE PROCEDURE public.handle_new_user();
 
 -- Function to update email_verified when email is confirmed
 CREATE OR REPLACE FUNCTION public.handle_email_verification()
@@ -70,14 +72,16 @@ BEGIN
   
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Trigger to update email_verified status
-CREATE OR REPLACE TRIGGER on_email_verified
+DROP TRIGGER IF EXISTS on_email_verified ON auth.users;
+
+CREATE TRIGGER on_email_verified
   AFTER UPDATE OF email_confirmed_at ON auth.users
   FOR EACH ROW
   WHEN (NEW.email_confirmed_at IS NOT NULL AND OLD.email_confirmed_at IS NULL)
-  EXECUTE FUNCTION public.handle_email_verification();
+  EXECUTE PROCEDURE public.handle_email_verification();
 
 -- Grant necessary permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;

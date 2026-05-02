@@ -170,14 +170,33 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Error creating user:', error);
-        return NextResponse.json(
-          { error: error.message, code: error.code, details: error.details },
-          { status: 500 }
-        );
-      }
+        // Race condition: auth trigger may insert this row milliseconds before API insert.
+        if (error.code === '23505') {
+          const { data: existingAfterRace, error: fetchError } = await supabaseAdmin
+            .from('users')
+            .select('*')
+            .eq('id', userId)
+            .single();
 
-      result = data;
+          if (fetchError) {
+            console.error('Error reading user after duplicate key race:', fetchError);
+            return NextResponse.json(
+              { error: fetchError.message, code: fetchError.code, details: fetchError.details },
+              { status: 500 }
+            );
+          }
+
+          result = existingAfterRace;
+        } else {
+          console.error('Error creating user:', error);
+          return NextResponse.json(
+            { error: error.message, code: error.code, details: error.details },
+            { status: 500 }
+          );
+        }
+      } else {
+        result = data;
+      }
     }
 
     return NextResponse.json({ user: result }, { status: 200 });
