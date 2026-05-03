@@ -109,10 +109,31 @@ async function findDownloadedVideo(dir: string): Promise<string> {
 function shortsVerticalFilterComplex(): string {
   return [
     "[0:v]split=2[v0][v1]",
-    "[v0]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=28[bg]",
+    // boxblur is available in older static ffmpeg builds where gblur may be missing.
+    "[v0]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=20:1[bg]",
     "[v1]scale=1080:1920:force_original_aspect_ratio=decrease[fg]",
     "[bg][fg]overlay=(W-w)/2:(H-h)/2[vout]",
   ].join(";");
+}
+
+function cleanFfmpegError(stderr: string | null | undefined, fallback: string): string {
+  const raw = [stderr, fallback].filter(Boolean).join("\n");
+  if (!raw.trim()) return "ffmpeg failed while rendering the clip.";
+
+  const lines = raw
+    .replace(/ffmpeg version[^\n\r]*/gi, "")
+    .replace(/configuration:[^\n\r]*/gi, "")
+    .replace(/built with[^\n\r]*/gi, "")
+    .replace(/Copyright[^\n\r]*/gi, "")
+    .split(/\r?\n|(?=Input #)|(?=Output #)|(?=Stream #)|(?=\[)|(?=Error)|(?=Invalid)|(?=No such)|(?=Conversion failed)/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const errorLines = lines.filter((line) =>
+    /error|invalid|failed|no such|not found|unable|unknown|conversion failed|filter/i.test(line)
+  );
+  const selected = errorLines.length ? errorLines : lines.slice(-10);
+  return selected.join(" ").slice(0, 1200) || "ffmpeg failed while rendering the clip.";
 }
 
 function runFfmpegSegment(
@@ -124,6 +145,7 @@ function runFfmpegSegment(
   configureFfmpeg();
   return new Promise((resolve, reject) => {
     ffmpeg(source)
+      .addOption("-hide_banner")
       .setStartTime(start)
       .setDuration(durationSec)
       .complexFilter(shortsVerticalFilterComplex())
@@ -150,7 +172,7 @@ function runFfmpegSegment(
       .output(output)
       .on("end", () => resolve())
       .on("error", (err, _stdout, stderr) => {
-        reject(new Error(stderr?.trim() || err.message));
+        reject(new Error(cleanFfmpegError(stderr, err.message)));
       })
       .run();
   });

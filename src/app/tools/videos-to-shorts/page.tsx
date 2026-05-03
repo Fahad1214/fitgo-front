@@ -33,6 +33,15 @@ function pickLoadingMessage(exclude?: string): string {
   return msg;
 }
 
+function getShortsApiBase(): string {
+  const raw = process.env.NEXT_PUBLIC_SHORTS_API_BASE_URL?.trim();
+  if (!raw) return '';
+  const withoutTrailingSlash = raw.replace(/\/$/, '');
+  return /^https?:\/\//i.test(withoutTrailingSlash)
+    ? withoutTrailingSlash
+    : `https://${withoutTrailingSlash}`;
+}
+
 export default function VideosToShortsPage() {
   const [url, setUrl] = useState('');
   /** String so users can type freely (e.g. "10") without per-keystroke clamping. */
@@ -92,7 +101,7 @@ export default function VideosToShortsPage() {
       const safeCount = clampClipCount(clipCountInput);
       setClipCountInput(String(safeCount));
 
-      const apiBase = process.env.NEXT_PUBLIC_SHORTS_API_BASE_URL?.replace(/\/$/, '') || '';
+      const apiBase = getShortsApiBase();
       const res = await fetch(`${apiBase}/api/youtube-shorts/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -100,8 +109,20 @@ export default function VideosToShortsPage() {
       });
 
       if (!res.ok) {
-        const data = (await res.json().catch(() => ({}))) as { message?: string };
-        throw new Error(data.message || 'Could not create shorts.');
+        const contentType = res.headers.get('content-type') || '';
+        let message = '';
+        if (contentType.includes('application/json')) {
+          const data = (await res.json().catch(() => ({}))) as { message?: string };
+          message = data.message || '';
+        } else {
+          message = await res.text().catch(() => '');
+        }
+
+        throw new Error(
+          message
+            ? `Could not create shorts (${res.status}): ${message.slice(0, 1000)}`
+            : `Could not create shorts (${res.status}). Check Railway logs for the full server error.`
+        );
       }
 
       const blob = await res.blob();
