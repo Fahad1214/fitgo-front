@@ -34,6 +34,14 @@ function pickLoadingMessage(exclude?: string): string {
 }
 
 function getShortsApiBase(): string {
+  if (
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1')
+  ) {
+    return '';
+  }
+
   const raw = process.env.NEXT_PUBLIC_SHORTS_API_BASE_URL?.trim();
   if (!raw) return '';
   const withoutTrailingSlash = raw.replace(/\/$/, '');

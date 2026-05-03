@@ -21,6 +21,8 @@ export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 
 const MAX_SOURCE_DURATION_SEC = 2 * 60 * 60;
+const SHORTS_WIDTH = 720;
+const SHORTS_HEIGHT = 1280;
 
 
 const CORS_HEADERS = {
@@ -110,8 +112,8 @@ function shortsVerticalFilterComplex(): string {
   return [
     "[0:v]split=2[v0][v1]",
     // boxblur is available in older static ffmpeg builds where gblur may be missing.
-    "[v0]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=20:1[bg]",
-    "[v1]scale=1080:1920:force_original_aspect_ratio=decrease[fg]",
+    `[v0]scale=${SHORTS_WIDTH}:${SHORTS_HEIGHT}:force_original_aspect_ratio=increase,crop=${SHORTS_WIDTH}:${SHORTS_HEIGHT},boxblur=16:1[bg]`,
+    `[v1]scale=${SHORTS_WIDTH}:${SHORTS_HEIGHT}:force_original_aspect_ratio=decrease[fg]`,
     "[bg][fg]overlay=(W-w)/2:(H-h)/2[vout]",
   ].join(";");
 }
@@ -157,9 +159,11 @@ function runFfmpegSegment(
         "-c:v",
         "libx264",
         "-preset",
-        "veryfast",
+        "ultrafast",
+        "-threads",
+        "1",
         "-crf",
-        "23",
+        "24",
         "-c:a",
         "aac",
         "-b:a",
