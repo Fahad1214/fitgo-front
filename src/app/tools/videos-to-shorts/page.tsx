@@ -92,7 +92,8 @@ export default function VideosToShortsPage() {
       const safeCount = clampClipCount(clipCountInput);
       setClipCountInput(String(safeCount));
 
-      const res = await fetch('/api/youtube-shorts/generate', {
+      const apiBase = process.env.NEXT_PUBLIC_SHORTS_API_BASE_URL?.replace(/\/$/, '') || '';
+      const res = await fetch(`${apiBase}/api/youtube-shorts/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: trimmed, clipCount: safeCount }),

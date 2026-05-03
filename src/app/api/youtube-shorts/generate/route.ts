@@ -22,6 +22,17 @@ export const dynamic = "force-dynamic";
 
 const MAX_SOURCE_DURATION_SEC = 2 * 60 * 60;
 
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": process.env.SHORTS_ALLOWED_ORIGIN || "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 type YtJson = {
   duration?: number;
   is_live?: boolean;
@@ -160,7 +171,7 @@ export async function POST(req: Request) {
     if (!url || !extractYoutubeId(url)) {
       return NextResponse.json(
         { message: "Paste a valid YouTube link." },
-        { status: 400 }
+        { status: 400, headers: CORS_HEADERS }
       );
     }
 
@@ -189,14 +200,14 @@ export async function POST(req: Request) {
             ? `${compact} Cookie mode detected: ${youtubeCookieMode()}. On Vercel Preview, set YT_DLP_COOKIES_BASE64 for the Preview environment and redeploy. YT_DLP_COOKIES_FILE only works when that file exists on the server.`
             : compact,
         },
-        { status: 400 }
+        { status: 400, headers: CORS_HEADERS }
       );
     }
 
     if (info.is_live) {
       return NextResponse.json(
         { message: "Live streams are not supported. Use a finished upload." },
-        { status: 400 }
+        { status: 400, headers: CORS_HEADERS }
       );
     }
 
@@ -205,7 +216,7 @@ export async function POST(req: Request) {
     if (!dur) {
       return NextResponse.json(
         { message: "Could not determine video length." },
-        { status: 400 }
+        { status: 400, headers: CORS_HEADERS }
       );
     }
 
@@ -214,7 +225,7 @@ export async function POST(req: Request) {
         {
           message: `Video is too long for this tool (max ${MAX_SOURCE_DURATION_SEC / 60} minutes).`,
         },
-        { status: 400 }
+        { status: 400, headers: CORS_HEADERS }
       );
     }
 
@@ -293,6 +304,7 @@ export async function POST(req: Request) {
     return new Response(zipBuffer, {
       status: 200,
       headers: {
+        ...CORS_HEADERS,
         "Content-Type": "application/zip",
         "Content-Disposition": 'attachment; filename="fitgo-shorts.zip"',
       },
@@ -303,7 +315,7 @@ export async function POST(req: Request) {
       err instanceof Error ? err.message : "Something went wrong while creating shorts.";
     return NextResponse.json(
       { message: message.replace(/\s+/g, " ").slice(0, 800) },
-      { status: 500 }
+      { status: 500, headers: CORS_HEADERS }
     );
   } finally {
     if (workDir) {
