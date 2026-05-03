@@ -24,7 +24,6 @@ import type { BlogDocument } from "../../../../prismicio-types.d";
 interface BlogPostProps {
   params: Promise<{ slug: string }>;
 }
-
 export async function generateMetadata({
   params,
 }: BlogPostProps): Promise<Metadata> {
