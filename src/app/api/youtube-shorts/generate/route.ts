@@ -29,6 +29,14 @@ type YtJson = {
 };
 
 
+function youtubeCookieMode(): string {
+  if (process.env.YT_DLP_COOKIES_BASE64?.trim()) return "base64";
+  if (process.env.YT_DLP_COOKIES_TEXT?.trim()) return "text";
+  if (process.env.YT_DLP_COOKIES_FILE?.trim()) return "file";
+  if (process.env.YT_DLP_COOKIES_FROM_BROWSER?.trim()) return "browser";
+  return "none";
+}
+
 async function youtubeCookieFlags(workDir: string): Promise<Record<string, string>> {
   const cookieFile = process.env.YT_DLP_COOKIES_FILE?.trim();
   const cookiesFromBrowser = process.env.YT_DLP_COOKIES_FROM_BROWSER?.trim();
@@ -178,7 +186,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           message: needsCookies
-            ? `${compact} Configure YT_DLP_COOKIES_FILE (Netscape cookie file path) or YT_DLP_COOKIES_FROM_BROWSER (e.g. chrome) on the server.`
+            ? `${compact} Cookie mode detected: ${youtubeCookieMode()}. On Vercel Preview, set YT_DLP_COOKIES_BASE64 for the Preview environment and redeploy. YT_DLP_COOKIES_FILE only works when that file exists on the server.`
             : compact,
         },
         { status: 400 }
